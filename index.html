@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sistema Vivero - Rosas del Monte</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background: #0f2b1d;
+    color: #f1f1f1;
+    text-align:center;
+}
+
+.logo{
+    width:220px;
+    margin-top:20px;
+}
+
+.container{
+    background:#163d2b;
+    margin:20px auto;
+    padding:20px;
+    width:90%;
+    max-width:600px;
+    border-radius:15px;
+    box-shadow:0 0 20px rgba(0,0,0,0.6);
+}
+
+input, select, button{
+    width:90%;
+    padding:10px;
+    margin:5px;
+    border-radius:8px;
+    border:none;
+}
+
+button{
+    background:#d4af37;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#c29b2f;
+}
+
+.alerta{
+    color:#ff4d4d;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<img src="logo.jpg" class="logo">
+
+<h2>🌿 Sistema Vivero - Rosas del Monte</h2>
+
+<div class="container">
+
+<h3>➕ Agregar Planta</h3>
+<input type="text" id="nombreNueva" placeholder="Nombre de la planta">
+<input type="number" id="precioNueva" placeholder="Precio">
+<input type="number" id="cantidadNueva" placeholder="Cantidad inicial">
+<button onclick="agregarPlanta()">Agregar</button>
+
+<hr>
+
+<h3>🌱 Reabastecer</h3>
+<input list="listaPlantas" id="reabastecerNombre" placeholder="Buscar planta">
+<datalist id="listaPlantas"></datalist>
+<input type="number" id="cantidadReabastecer" placeholder="Cantidad a agregar">
+<button onclick="reabastecer()">Reabastecer</button>
+
+<hr>
+
+<h3>💰 Venta Rápida</h3>
+<input list="listaPlantas" id="ventaNombre" placeholder="Buscar planta">
+<input type="number" id="ventaCantidad" placeholder="Cantidad">
+<button onclick="registrarVenta()">Registrar Venta</button>
+
+<hr>
+
+<h3>📊 Resumen Hoy</h3>
+<div id="resumen"></div>
+
+<hr>
+
+<h3>📦 Inventario</h3>
+<div id="inventario"></div>
+
+</div>
+
+<script>
+
+let plantas = JSON.parse(localStorage.getItem("plantas")) || {};
+let dineroHoy = parseFloat(localStorage.getItem("dineroHoy")) || 0;
+let vendidasHoy = parseInt(localStorage.getItem("vendidasHoy")) || 0;
+
+function guardar(){
+    localStorage.setItem("plantas", JSON.stringify(plantas));
+    localStorage.setItem("dineroHoy", dineroHoy);
+    localStorage.setItem("vendidasHoy", vendidasHoy);
+}
+
+function actualizarLista(){
+    let lista = document.getElementById("listaPlantas");
+    lista.innerHTML = "";
+    for(let nombre in plantas){
+        let option = document.createElement("option");
+        option.value = nombre;
+        lista.appendChild(option);
+    }
+}
+
+function agregarPlanta(){
+    let nombre = document.getElementById("nombreNueva").value.trim();
+    let precio = parseFloat(document.getElementById("precioNueva").value);
+    let cantidad = parseInt(document.getElementById("cantidadNueva").value);
+
+    if(!nombre || plantas[nombre]){
+        alert("Planta ya existe o nombre inválido");
+        return;
+    }
+
+    plantas[nombre] = {
+        precio: precio,
+        inventario: cantidad,
+        vendidas: 0
+    };
+
+    guardar();
+    actualizarLista();
+    mostrarInventario();
+}
+
+function reabastecer(){
+    let nombre = document.getElementById("reabastecerNombre").value;
+    let cantidad = parseInt(document.getElementById("cantidadReabastecer").value);
+
+    if(plantas[nombre]){
+        plantas[nombre].inventario += cantidad;
+        guardar();
+        mostrarInventario();
+    }
+}
+
+function registrarVenta(){
+    let nombre = document.getElementById("ventaNombre").value;
+    let cantidad = parseInt(document.getElementById("ventaCantidad").value);
+
+    if(plantas[nombre] && plantas[nombre].inventario >= cantidad){
+        plantas[nombre].inventario -= cantidad;
+        plantas[nombre].vendidas += cantidad;
+        dineroHoy += cantidad * plantas[nombre].precio;
+        vendidasHoy += cantidad;
+
+        guardar();
+        mostrarInventario();
+    } else {
+        alert("Inventario insuficiente o planta no válida");
+    }
+}
+
+function mostrarInventario(){
+    let div = document.getElementById("inventario");
+    div.innerHTML = "";
+
+    for(let nombre in plantas){
+        let p = plantas[nombre];
+        let alerta = p.inventario <= 10 ? "<span class='alerta'>⚠ Reabastecer</span>" : "";
+        div.innerHTML += `
+        <p>
+        <strong>${nombre}</strong><br>
+        Precio: $${p.precio}<br>
+        Inventario: ${p.inventario} ${alerta}<br>
+        Vendidas: ${p.vendidas}
+        </p><hr>
+        `;
+    }
+
+    document.getElementById("resumen").innerHTML = `
+    Plantas vendidas hoy: ${vendidasHoy}<br>
+    Dinero generado hoy: $${dineroHoy.toFixed(2)}
+    `;
+}
+
+actualizarLista();
+mostrarInventario();
+
+</script>
+
+</body>
+</html>
