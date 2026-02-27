@@ -148,12 +148,28 @@ function actualizarLista(){
 }
 
 function agregarPlanta(){
+
     let nombre = document.getElementById("nombreNueva").value.trim();
     let precio = parseFloat(document.getElementById("precioNueva").value);
     let cantidad = parseInt(document.getElementById("cantidadNueva").value);
 
-    if(!nombre || plantas[nombre]){
-        mostrarMensaje("La planta ya existe o nombre inválido", "error");
+    if(nombre === ""){
+        mostrarMensaje("Debe ingresar el nombre de la planta 🌿", "error");
+        return;
+    }
+
+    if(isNaN(precio) || precio <= 0){
+        mostrarMensaje("Debe ingresar un precio válido mayor a 0 💲", "error");
+        return;
+    }
+
+    if(isNaN(cantidad) || cantidad < 0){
+        mostrarMensaje("Debe ingresar una cantidad válida (0 o mayor) 📦", "error");
+        return;
+    }
+
+    if(plantas[nombre]){
+        mostrarMensaje("Esa planta ya existe en el inventario", "error");
         return;
     }
 
@@ -175,43 +191,73 @@ function agregarPlanta(){
 }
 
 function reabastecer(){
-    let nombre = document.getElementById("reabastecerNombre").value;
+
+    let nombre = document.getElementById("reabastecerNombre").value.trim();
     let cantidad = parseInt(document.getElementById("cantidadReabastecer").value);
 
-    if(plantas[nombre] && cantidad > 0){
-        plantas[nombre].inventario += cantidad;
-        guardar();
-        mostrarInventario();
-
-        document.getElementById("reabastecerNombre").value = "";
-        document.getElementById("cantidadReabastecer").value = "";
-
-        mostrarMensaje("Stock actualizado correctamente 📦", "exito");
-    } else {
-        mostrarMensaje("Datos inválidos para reabastecer", "error");
+    if(nombre === ""){
+        mostrarMensaje("Seleccione una planta para reabastecer 🌱", "error");
+        return;
     }
+
+    if(!plantas[nombre]){
+        mostrarMensaje("La planta no existe en el inventario", "error");
+        return;
+    }
+
+    if(isNaN(cantidad) || cantidad <= 0){
+        mostrarMensaje("Ingrese una cantidad válida mayor a 0 📦", "error");
+        return;
+    }
+
+    plantas[nombre].inventario += cantidad;
+
+    guardar();
+    mostrarInventario();
+
+    document.getElementById("reabastecerNombre").value = "";
+    document.getElementById("cantidadReabastecer").value = "";
+
+    mostrarMensaje("Stock actualizado correctamente 📦", "exito");
 }
 
 function registrarVenta(){
-    let nombre = document.getElementById("ventaNombre").value;
+
+    let nombre = document.getElementById("ventaNombre").value.trim();
     let cantidad = parseInt(document.getElementById("ventaCantidad").value);
 
-    if(plantas[nombre] && plantas[nombre].inventario >= cantidad && cantidad > 0){
-        plantas[nombre].inventario -= cantidad;
-        plantas[nombre].vendidas += cantidad;
-        dineroHoy += cantidad * plantas[nombre].precio;
-        vendidasHoy += cantidad;
-
-        guardar();
-        mostrarInventario();
-
-        document.getElementById("ventaNombre").value = "";
-        document.getElementById("ventaCantidad").value = "";
-
-        mostrarMensaje("Venta registrada correctamente 💰", "exito");
-    } else {
-        mostrarMensaje("Inventario insuficiente o planta inválida", "error");
+    if(nombre === ""){
+        mostrarMensaje("Seleccione una planta para vender 🌿", "error");
+        return;
     }
+
+    if(!plantas[nombre]){
+        mostrarMensaje("La planta no existe en el inventario", "error");
+        return;
+    }
+
+    if(isNaN(cantidad) || cantidad <= 0){
+        mostrarMensaje("Ingrese una cantidad válida mayor a 0 💰", "error");
+        return;
+    }
+
+    if(plantas[nombre].inventario < cantidad){
+        mostrarMensaje("Inventario insuficiente para realizar la venta", "error");
+        return;
+    }
+
+    plantas[nombre].inventario -= cantidad;
+    plantas[nombre].vendidas += cantidad;
+    dineroHoy += cantidad * plantas[nombre].precio;
+    vendidasHoy += cantidad;
+
+    guardar();
+    mostrarInventario();
+
+    document.getElementById("ventaNombre").value = "";
+    document.getElementById("ventaCantidad").value = "";
+
+    mostrarMensaje("Venta registrada correctamente 💰", "exito");
 }
 
 function mostrarInventario(){
