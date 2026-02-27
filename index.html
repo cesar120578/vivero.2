@@ -27,7 +27,7 @@ body{
     box-shadow:0 0 20px rgba(0,0,0,0.6);
 }
 
-input, select, button{
+input, button{
     width:90%;
     padding:10px;
     margin:5px;
@@ -50,6 +50,24 @@ button:hover{
     color:#ff4d4d;
     font-weight:bold;
 }
+
+#mensaje{
+    margin:10px;
+    padding:10px;
+    border-radius:8px;
+    font-weight:bold;
+    display:none;
+}
+
+.exito{
+    background:#1e7a3b;
+    color:white;
+}
+
+.error{
+    background:#a83232;
+    color:white;
+}
 </style>
 </head>
 
@@ -60,6 +78,8 @@ button:hover{
 <h2>🌿 Sistema Vivero - Rosas del Monte</h2>
 
 <div class="container">
+
+<div id="mensaje"></div>
 
 <h3>➕ Agregar Planta</h3>
 <input type="text" id="nombreNueva" placeholder="Nombre de la planta">
@@ -106,6 +126,17 @@ function guardar(){
     localStorage.setItem("vendidasHoy", vendidasHoy);
 }
 
+function mostrarMensaje(texto, tipo){
+    let mensaje = document.getElementById("mensaje");
+    mensaje.innerText = texto;
+    mensaje.className = tipo;
+    mensaje.style.display = "block";
+
+    setTimeout(() => {
+        mensaje.style.display = "none";
+    }, 3000);
+}
+
 function actualizarLista(){
     let lista = document.getElementById("listaPlantas");
     lista.innerHTML = "";
@@ -122,7 +153,7 @@ function agregarPlanta(){
     let cantidad = parseInt(document.getElementById("cantidadNueva").value);
 
     if(!nombre || plantas[nombre]){
-        alert("Planta ya existe o nombre inválido");
+        mostrarMensaje("La planta ya existe o nombre inválido", "error");
         return;
     }
 
@@ -135,16 +166,29 @@ function agregarPlanta(){
     guardar();
     actualizarLista();
     mostrarInventario();
+
+    document.getElementById("nombreNueva").value = "";
+    document.getElementById("precioNueva").value = "";
+    document.getElementById("cantidadNueva").value = "";
+
+    mostrarMensaje("Planta agregada correctamente 🌿", "exito");
 }
 
 function reabastecer(){
     let nombre = document.getElementById("reabastecerNombre").value;
     let cantidad = parseInt(document.getElementById("cantidadReabastecer").value);
 
-    if(plantas[nombre]){
+    if(plantas[nombre] && cantidad > 0){
         plantas[nombre].inventario += cantidad;
         guardar();
         mostrarInventario();
+
+        document.getElementById("reabastecerNombre").value = "";
+        document.getElementById("cantidadReabastecer").value = "";
+
+        mostrarMensaje("Stock actualizado correctamente 📦", "exito");
+    } else {
+        mostrarMensaje("Datos inválidos para reabastecer", "error");
     }
 }
 
@@ -152,7 +196,7 @@ function registrarVenta(){
     let nombre = document.getElementById("ventaNombre").value;
     let cantidad = parseInt(document.getElementById("ventaCantidad").value);
 
-    if(plantas[nombre] && plantas[nombre].inventario >= cantidad){
+    if(plantas[nombre] && plantas[nombre].inventario >= cantidad && cantidad > 0){
         plantas[nombre].inventario -= cantidad;
         plantas[nombre].vendidas += cantidad;
         dineroHoy += cantidad * plantas[nombre].precio;
@@ -160,8 +204,13 @@ function registrarVenta(){
 
         guardar();
         mostrarInventario();
+
+        document.getElementById("ventaNombre").value = "";
+        document.getElementById("ventaCantidad").value = "";
+
+        mostrarMensaje("Venta registrada correctamente 💰", "exito");
     } else {
-        alert("Inventario insuficiente o planta no válida");
+        mostrarMensaje("Inventario insuficiente o planta inválida", "error");
     }
 }
 
