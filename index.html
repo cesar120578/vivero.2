@@ -110,7 +110,8 @@ button:hover{
 <hr>
 
 <h3>📦 Inventario</h3>
-<div id="inventario"></div>
+<button id="btnInventario" onclick="toggleInventario()">Mostrar Inventario</button>
+<div id="inventario" style="display:none;"></div>
 
 </div>
 
@@ -147,33 +148,60 @@ function actualizarLista(){
     }
 }
 
+function toggleInventario(){
+    let div = document.getElementById("inventario");
+    let boton = document.getElementById("btnInventario");
+
+    if(div.style.display === "none"){
+        mostrarInventario();
+        div.style.display = "block";
+        boton.innerText = "Ocultar Inventario";
+    } else {
+        div.style.display = "none";
+        boton.innerText = "Mostrar Inventario";
+    }
+}
+
 function agregarPlanta(){
 
-    let nombre = document.getElementById("nombreNueva").value.trim();
-    let precio = parseFloat(document.getElementById("precioNueva").value);
-    let cantidad = parseInt(document.getElementById("cantidadNueva").value);
+    let nombreInput = document.getElementById("nombreNueva").value.trim();
+    let precioInput = document.getElementById("precioNueva").value;
+    let cantidadInput = document.getElementById("cantidadNueva").value;
 
-    if(nombre === ""){
+    if(nombreInput === ""){
         mostrarMensaje("Debe ingresar el nombre de la planta 🌿", "error");
         return;
     }
 
+    if(precioInput === ""){
+        mostrarMensaje("Debe ingresar el precio 💲", "error");
+        return;
+    }
+
+    if(cantidadInput === ""){
+        mostrarMensaje("Debe ingresar la cantidad inicial 📦", "error");
+        return;
+    }
+
+    let precio = parseFloat(precioInput);
+    let cantidad = parseInt(cantidadInput);
+
     if(isNaN(precio) || precio <= 0){
-        mostrarMensaje("Debe ingresar un precio válido mayor a 0 💲", "error");
+        mostrarMensaje("El precio debe ser mayor a 0 💲", "error");
         return;
     }
 
     if(isNaN(cantidad) || cantidad < 0){
-        mostrarMensaje("Debe ingresar una cantidad válida (0 o mayor) 📦", "error");
+        mostrarMensaje("La cantidad debe ser 0 o mayor 📦", "error");
         return;
     }
 
-    if(plantas[nombre]){
+    if(plantas[nombreInput]){
         mostrarMensaje("Esa planta ya existe en el inventario", "error");
         return;
     }
 
-    plantas[nombre] = {
+    plantas[nombreInput] = {
         precio: precio,
         inventario: cantidad,
         vendidas: 0
@@ -181,7 +209,6 @@ function agregarPlanta(){
 
     guardar();
     actualizarLista();
-    mostrarInventario();
 
     document.getElementById("nombreNueva").value = "";
     document.getElementById("precioNueva").value = "";
@@ -213,7 +240,6 @@ function reabastecer(){
     plantas[nombre].inventario += cantidad;
 
     guardar();
-    mostrarInventario();
 
     document.getElementById("reabastecerNombre").value = "";
     document.getElementById("cantidadReabastecer").value = "";
@@ -252,7 +278,6 @@ function registrarVenta(){
     vendidasHoy += cantidad;
 
     guardar();
-    mostrarInventario();
 
     document.getElementById("ventaNombre").value = "";
     document.getElementById("ventaCantidad").value = "";
@@ -284,7 +309,6 @@ function mostrarInventario(){
 }
 
 actualizarLista();
-mostrarInventario();
 
 </script>
 
